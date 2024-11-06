@@ -15,11 +15,14 @@ builder.Logging.AddConsole(options =>
 #pragma warning restore CS0618 // Type or member is obsolete
 });
 
-builder.Services.AddControllers();
+builder.Services.Configure<RouteOptions>(options => options.LowercaseUrls = true);
+
+builder.Services.AddControllers()
+    .AddMvcLocalization()
+    .AddDataAnnotationsLocalization();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-
-builder.Services.AddLocalization(options => options.ResourcesPath = "Resources");
+builder.Services.AddLocalization();
 builder.Services.AddAutoMapper(typeof(Program));
 
 var connectionString = Environment.GetEnvironmentVariable("ASPNETCORE_SPA_SHOP_WEBSERVER_CONNECTIONSTRING");
@@ -43,6 +46,14 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+var supportedCultures = new[] { "en-US", "ru-RU" };
+var localizationOptions = new RequestLocalizationOptions()
+    .SetDefaultCulture(supportedCultures[0])
+    .AddSupportedCultures(supportedCultures)
+    .AddSupportedUICultures(supportedCultures);
+
+app.UseRequestLocalization(localizationOptions);
 
 app.UseHttpsRedirection();
 
