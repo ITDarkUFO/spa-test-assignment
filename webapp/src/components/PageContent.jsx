@@ -1,6 +1,7 @@
 ﻿import { React, useState, useEffect } from 'react';
-import { Layout, Typography, Row, Flex, Button, Modal, Input } from 'antd';
+import { Typography, Row, Flex } from 'antd';
 
+import { useDataFetch } from '../context/DataFetchContext';
 import { useModal } from '../context/ModalContext';
 
 import CreateProductButton from '../components/CreateProductButton';
@@ -10,19 +11,23 @@ import axios from '../api/axios'
 
 const { Title, Paragraph } = Typography;
 
+
 const PageContent = () => {
     const [page, setPage] = useState(1);
-    const [pageSize, setPageSize] = useState(null);
+    const [pageSize, setPageSize] = useState(100);
 
     const [data, setData] = useState(null);
     const [error, setError] = useState(null);
     const [loading, setLoading] = useState(true);
-    const { isCreateModalVisible } = useModal();
 
+    const { state, dispatch } = useDataFetch();
 
     useEffect(() => {
-        fetchDataAsync();
-    }, [isCreateModalVisible]);
+        if (state.isDataFetchActive) {
+            fetchDataAsync();
+            dispatch({ type: 'TOGGLE_FETCH' });
+        }
+    }, [state.isDataFetchActive]);
 
     const fetchDataAsync = async () => {
         try {

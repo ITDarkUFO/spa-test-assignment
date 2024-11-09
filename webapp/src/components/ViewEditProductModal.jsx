@@ -1,33 +1,47 @@
 ﻿import { React, useEffect, useState } from 'react'
-import { Button, Modal, Input, InputNumber, Form } from 'antd'
+import { Button, Modal, Input, InputNumber, Form, Typography } from 'antd'
+import { CloseOutlined, EditOutlined, SaveOutlined } from '@ant-design/icons';
+
+import ProductForm from './ProductForm';
+
+import { useDataFetch } from '../context/DataFetchContext';
 import { useModal } from '../context/ModalContext';
+
 import axios from '../api/axios'
 
 const { TextArea } = Input;
+const { Text } = Typography;
 
 const ViewEditProductModal = () => {
-    const { isViewModalVisible, setViewModalVisible, viewModalProductId } = useModal();
+    const { isViewEditModalVisible, setViewEditModalVisible, viewEditModalProductId, setViewEditModalProductId } = useModal();
+    const { dispatch } = useDataFetch();
 
-    const [productData, setProductData] = useState(null);
+    const isFormReadOnly = true;
+
     const [isLoading, setIsLoading] = useState(false);
     const [isEditMode, setIsEditMode] = useState(false);
+    const [isFormDisabled, setIsFormDisabled] = useState(false);
 
-    const [form] = Form.useForm();
-    const isReadOnly = true;
+    const [data, setData] = useState(null);
+
+    const [viewForm] = Form.useForm();
+    const [editForm] = Form.useForm();
+
 
     useEffect(() => {
-        if (viewModalProductId != null) {
+        if (viewEditModalProductId != null) {
             setIsLoading(true);
             fetchDataAsync();
         }
-    }, [viewModalProductId]);
+    }, [viewEditModalProductId]);
 
     const fetchDataAsync = async () => {
         try {
-            const response = await axios.get(`/api/products/${viewModalProductId}`);
+            const response = await axios.get(`/api/products/${viewEditModalProductId}`);
             console.debug(response);
-            form.setFieldsValue(response.data);
-            setProductData(response.data);
+
+            setData(response.data);
+            viewForm.setFieldsValue(response.data);
         }
         catch (error) {
             console.error(error);
@@ -37,50 +51,104 @@ const ViewEditProductModal = () => {
         }
     }
 
+    const submitFormAsync = async () => {
+        try {
+            var validateResults = await editForm.validateFields();
+            setIsFormDisabled(true);
+
+            const response = await axios.put(`/api/products/${data.Id}`, validateResults);
+            console.log(response);
+
+            setViewEditModalVisible(false);
+            setViewEditModalProductId(null);
+            setIsEditMode(false);
+
+            dispatch({ type: 'TOGGLE_FETCH' });
+
+            editForm.resetFields();
+        }
+        catch (error) {
+            console.log(error);
+
+            const errors = Object.keys(error.response.data.errors).map((field => ({
+                name: field,
+                errors: [error.response.data.errors[field]],
+            })));
+            editForm.setFields(errors);
+        }
+        finally {
+            setIsFormDisabled(false);
+        }
+    }
+
     const handleClose = () => {
-        setViewModalVisible(false);
+        setViewEditModalVisible(false);
+        setIsEditMode(false);
     }
 
     const ProductData = () => {
-        var styles = { color: "black" };
-
         if (!isLoading) {
+            if (!isEditMode) {
+                return (
+                    <Form form={viewForm} layout="vertical" className="modal-form">
+                        <Form.Item name="Name" label="Название товара">
+                            <TextArea readOnly={isFormReadOnly} size="large"></TextArea>
+                        </Form.Item>
+                        <Form.Item name="Description" label="Описание товара">
+                            <TextArea readOnly={isFormReadOnly} size="large" ></TextArea>
+                        </Form.Item>
+                        <Form.Item name="Vendorcode" label="Код товара">
+                            <InputNumber readOnly={isFormReadOnly} size="large" />
+                        </Form.Item>
+                        <Form.Item name="Quantity" label="Количество на складе">
+                            <InputNumber readOnly={isFormReadOnly} id="productQuantity" size="large" />
+                        </Form.Item>
+                        <Form.Item name="Price" label="Цена товара">
+                            <InputNumber readOnly={isFormReadOnly} size="large" />
+                        </Form.Item>
+                    </Form>
+                );
+            }
+            else {
+                return (
+                    <ProductForm form={editForm} isFormDisabled={isFormDisabled} />
+                )
+            }
+        }
+    }
+
+    const getModalTitle = () => {
+        return isEditMode ? "Редактирование товара" : "Просмотр товара";
+    }
+
+    const changeEditMode = () => {
+        setIsEditMode(!isEditMode);
+        editForm.setFieldsValue(data);
+    }
+
+    const FooterButtons = () => {
+        if (isEditMode) {
             return (
-                <Form form={form} layout="vertical" className="modal-form">
-                    <Form.Item name="Name" label="Название товара">
-                        <TextArea readOnly={isReadOnly} size="large" style={{ fieldSizing: "content", styles }}></TextArea>
-                    </Form.Item>
-                    <Form.Item name="Description" label="Описание товара">
-                        <TextArea readOnly={isReadOnly} size="large" style={{ fieldSizing: "content", styles }}></TextArea>
-                    </Form.Item>
-                    <Form.Item name="Vendorcode" label="Код товара">
-                        <InputNumber readOnly={isReadOnly} size="large" />
-                    </Form.Item>
-                    <Form.Item name="Quantity" label="Количество на складе">
-                        <InputNumber readOnly={isReadOnly} id="productQuantity" size="large" />
-                    </Form.Item>
-                    <Form.Item name="Price" label="Цена товара">
-                        <InputNumber readOnly={isReadOnly} size="large" />
-                    </Form.Item>
-                </Form>
+                <>
+                    <Button icon={<CloseOutlined />} onClick={changeEditMode}>Отменить редактирование</Button>
+                    <Button icon={<SaveOutlined />} type="primary" key="back" onClick={submitFormAsync}>Сохранить</Button>
+                </>
+            );
+        }
+        else {
+            return (
+                <>
+                    <Button icon={<EditOutlined />} onClick={changeEditMode}>Редактировать товар</Button>
+                    <Button icon={<CloseOutlined />} key="back" onClick={handleClose}>Закрыть</Button>
+                </>
             );
         }
     }
 
-    const FooterButtons = () => {
-        return (
-            <>
-                <Button>Редактировать товар</Button>
-                <Button key="back" onClick={handleClose}>Закрыть</Button>
-            </>
-        );
-    }
-
     return (
-        <Modal title="Просмотр товара"
+        <Modal title={getModalTitle()}
             loading={isLoading}
-            okText="Закрыть"
-            open={isViewModalVisible}
+            open={isViewEditModalVisible}
             onCancel={handleClose}
             footer={FooterButtons}>
             <ProductData />
