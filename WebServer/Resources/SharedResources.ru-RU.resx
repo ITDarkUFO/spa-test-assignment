@@ -138,4 +138,13 @@
   <data name="ErrorWhileSavingChanges" xml:space="preserve">
     <value>Возникла ошибка при сохранении изменений, попробуйте еще раз</value>
   </data>
+  <data name="NonPositiveValueError" xml:space="preserve">
+    <value>Значение {0} должно быть больше нуля</value>
+  </data>
+  <data name="NothingFound" xml:space="preserve">
+    <value>Ничего не найдено во время поиска</value>
+  </data>
+  <data name="RequiredError" xml:space="preserve">
+    <value>{0} не может быть пустым</value>
+  </data>
 </root>

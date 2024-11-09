@@ -1,8 +1,8 @@
 ﻿using AutoMapper;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Localization;
+using System.Text.Json;
 using WebServer.DTOs;
 using WebServer.Models;
 using WebServer.Resources;
@@ -20,12 +20,44 @@ namespace WebServer.Controllers
         private readonly ProductsService _productsService = productsService;
 
         [HttpGet]
+        public async Task<IActionResult> GetProducts(int page = 1, int pageSize = 10)
+        {
+            try
+            {
+                var output = new Dictionary<string, object>();
+
+                var products = await _productsService.GetProductsAsync(page, pageSize);
+                var productCount = await _productsService.GetProductsCountAsync();
+                var totalPages = Math.Ceiling((decimal)productCount / pageSize);
+
+                if (products.Count == 0)
+                    output.Add("message", _localizer["NothingFound"].Value);
+
+                output.Add("page", page);
+                output.Add("pageSize", pageSize);
+                output.Add("totalPages", totalPages);
+                output.Add("products", products);
+
+                return Ok(JsonSerializer.Serialize(output));
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogCritical("Возникла неизвестная ошибка:\n{ex}", ex);
+                return BadRequest(_localizer["UnknownError"].Value);
+            }
+        }
+
+        [HttpGet("{id}")]
         public async Task<IActionResult> GetProduct(int id)
         {
             try
             {
                 var product = await _productsService.GetProductByIdAsync(id);
-                return Ok(product);
+                return Ok(JsonSerializer.Serialize(product));
             }
             catch (KeyNotFoundException ex)
             {
@@ -56,7 +88,7 @@ namespace WebServer.Controllers
             }
         }
 
-        [HttpPut]
+        [HttpPut("{id}")]
         public async Task<IActionResult> UpdateProduct(int id, [FromBody] Product product)
         {
             if (!ModelState.IsValid)
@@ -71,9 +103,8 @@ namespace WebServer.Controllers
             {
                 return NotFound(ex.Message);
             }
-            catch (DbUpdateConcurrencyException ex)
+            catch (DbUpdateConcurrencyException)
             {
-                _logger.LogWarning("Возникла ошибка при сохранении изменений:\n{ex}", ex);
                 return BadRequest(_localizer["ErrorWhileSavingChanges"].Value);
             }
             catch (Exception ex)
@@ -83,8 +114,8 @@ namespace WebServer.Controllers
             }
         }
 
-        [HttpDelete]
-        public async Task<IActionResult> DeleteProduct(int id)
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteProduct([FromRoute] int id)
         {
             try
             {
@@ -94,6 +125,11 @@ namespace WebServer.Controllers
             catch (KeyNotFoundException ex)
             {
                 return NotFound(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogCritical("Возникла неизвестная ошибка:\n{ex}", ex);
+                return BadRequest(_localizer["UnknownError"].Value);
             }
         }
     }

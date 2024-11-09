@@ -1,6 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Query.SqlExpressions;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Localization;
 using WebServer.Models;
 using WebServer.Resources;
@@ -13,16 +11,30 @@ namespace WebServer.Services
         private readonly IStringLocalizer<SharedResources> _localizer = localizer;
         private readonly ProductsContext _context = context;
 
+        public async Task<int> GetProductsCountAsync()
+        {
+            var productsCount = await _context.Products.CountAsync();
+            return productsCount;
+        }
+
+        public async Task<List<Product>> GetProductsAsync(int page, int pageSize)
+        {
+            if (page <= 0)
+                throw new ArgumentException(_localizer["NonPositiveValueError", nameof(page)]);
+
+            if (pageSize <= 0)
+                throw new ArgumentException(_localizer["NonPositiveValueError", nameof(pageSize)]);
+
+            var products = await _context.Products.OrderBy(p => p.Id).Skip((page - 1) * pageSize).Take(pageSize).ToListAsync();
+            return products;
+        }
 
         public async Task<Product> GetProductByIdAsync(int id)
         {
             var product = await _context.Products.FirstOrDefaultAsync(p => p.Id == id);
 
-            if (product is null) 
-            {
-                _logger.LogWarning("Был запрошен несуществующий продукт с Id {id}", id);
+            if (product is null)
                 throw new KeyNotFoundException(_localizer["ProductNotFound"].Value);
-            }
 
             return product;
         }
@@ -48,7 +60,7 @@ namespace WebServer.Services
                 await _context.SaveChangesAsync();
                 _logger.LogInformation("Обновлен продукт\n\t{id}: {vendorcode} - {name}", product.Id, product.Vendorcode, product.Name);
             }
-            catch (DbUpdateConcurrencyException)
+            catch (DbUpdateConcurrencyException ex)
             {
                 if (!ProductExists(product.Id))
                 {
@@ -56,6 +68,7 @@ namespace WebServer.Services
                 }
                 else
                 {
+                    _logger.LogWarning("Возникла ошибка при сохранении изменений:\n{ex}", ex);
                     throw;
                 }
             }
@@ -67,7 +80,7 @@ namespace WebServer.Services
 
             if (product is null)
                 throw new KeyNotFoundException(_localizer["ProductNotFound"].Value);
-            
+
             _context.Products.Remove(product);
             await _context.SaveChangesAsync();
             _logger.LogInformation("Удален продукт\n\t{id}: {vendorcode} - {name}", product.Id, product.Vendorcode, product.Name);

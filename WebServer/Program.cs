@@ -39,6 +39,17 @@ builder.Services.AddDbContext<ProductsContext>(options =>
 
 builder.Services.AddScoped<ProductsService>();
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllCors",
+        builder =>
+        {
+            builder.AllowAnyHeader();
+            builder.AllowAnyMethod();
+            builder.AllowAnyOrigin();
+        });
+});
+
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
@@ -56,6 +67,8 @@ var localizationOptions = new RequestLocalizationOptions()
 app.UseRequestLocalization(localizationOptions);
 
 app.UseHttpsRedirection();
+
+app.UseCors("AllCors");
 
 app.UseAuthorization();
 

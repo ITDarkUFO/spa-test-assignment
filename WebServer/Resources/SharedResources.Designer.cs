@@ -70,6 +70,24 @@ namespace WebServer.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The value of {0} must be greater than zero.
+        /// </summary>
+        public static string NonPositiveValueError {
+            get {
+                return ResourceManager.GetString("NonPositiveValueError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Nothing found during search.
+        /// </summary>
+        public static string NothingFound {
+            get {
+                return ResourceManager.GetString("NothingFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The specified product has been deleted.
         /// </summary>
         public static string ProductHasBeenDeleted {
@@ -111,6 +129,15 @@ namespace WebServer.Resources {
         public static string ProductSuccessfullyUpdated {
             get {
                 return ResourceManager.GetString("ProductSuccessfullyUpdated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} cannot be empty.
+        /// </summary>
+        public static string RequiredError {
+            get {
+                return ResourceManager.GetString("RequiredError", resourceCulture);
             }
         }
         
