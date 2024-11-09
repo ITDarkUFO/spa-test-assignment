@@ -25,7 +25,7 @@ namespace WebServer.Services
             if (pageSize <= 0)
                 throw new ArgumentException(_localizer["NonPositiveValueError", nameof(pageSize)]);
 
-            var products = await _context.Products.OrderBy(p => p.Id).Skip((page - 1) * pageSize).Take(pageSize).ToListAsync();
+            var products = await _context.Products.OrderByDescending(p => p.Id).Skip((page - 1) * pageSize).Take(pageSize).ToListAsync();
             return products;
         }
 
