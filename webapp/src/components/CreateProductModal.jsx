@@ -29,6 +29,7 @@ const CreateProductModal = () => {
             var validateResults = await form.validateFields();
             setIsFormDisabled(true);
 
+            console.debug("Запрос на добавление товара");
             const response = await axios.post("/api/products", validateResults);
             console.log(response);
 

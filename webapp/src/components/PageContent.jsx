@@ -2,19 +2,18 @@
 import { Typography, Row, Flex } from 'antd';
 
 import { useDataFetch } from '../context/DataFetchContext';
-import { useModal } from '../context/ModalContext';
 
-import CreateProductButton from '../components/CreateProductButton';
-import CardsList from '../components/CardsList';
+import LoadingSkeleton from './LoadingSkeleton';
+import CreateProductButton from './CreateProductButton';
+import CardsList from './CardsList';
 
 import axios from '../api/axios'
 
-const { Title, Paragraph } = Typography;
-
+const { Title, Paragraph, Text } = Typography;
 
 const PageContent = () => {
     const [page, setPage] = useState(1);
-    const [pageSize, setPageSize] = useState(100);
+    const [pageSize, setPageSize] = useState(null);
 
     const [data, setData] = useState(null);
     const [error, setError] = useState(null);
@@ -27,7 +26,7 @@ const PageContent = () => {
             fetchDataAsync();
             dispatch({ type: 'TOGGLE_FETCH' });
         }
-    }, [state.isDataFetchActive]);
+    }, [state.isDataFetchActive, dispatch]);
 
     const fetchDataAsync = async () => {
         try {
@@ -49,6 +48,13 @@ const PageContent = () => {
         }
     }
 
+    const ProductsPage = () => {
+        if (data.length === 0)
+            return (<Text style={{ fontSize: 18 }}>Товаров нет</Text>);
+
+        return (<CardsList productsData={data} onDelete={setData} />);
+    };
+
     if (error) {
         return (
             <Row justify="center" align="middle" style={{ height: '80vh' }}>
@@ -59,11 +65,7 @@ const PageContent = () => {
     }
 
     if (loading) {
-        return (
-            <Row justify="center" align="middle" style={{ height: '80vh' }}>
-                <Paragraph style={{ fontSize: 40 }}>Загрузка товаров...</Paragraph>
-            </Row>
-        )
+        return <LoadingSkeleton />;
     }
 
     return (
@@ -72,8 +74,7 @@ const PageContent = () => {
                 <Title>Список товаров</Title>
                 <CreateProductButton />
             </Flex>
-            {data.length === 0 && (<p>Товаров нет</p>)}
-            {data.length > 0 && <CardsList productsData={data} onDelete={setData} />}
+            <ProductsPage />
         </>
     )
 }

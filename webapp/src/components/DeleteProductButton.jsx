@@ -1,4 +1,4 @@
-import { React, useState, useMemo } from 'react'
+﻿import { React, useState, useMemo } from 'react'
 import axios from '../api/axios'
 import { Button } from 'antd'
 import { DeleteOutlined } from '@ant-design/icons';
@@ -26,6 +26,7 @@ const DeleteButton = ({ productId, onDelete }) => {
         }
 
         try {
+            console.debug(`Запрос на удаление товара ${productId}`);
             setSubmitting(true);
 
             const response = await axios.delete(`/api/products/${productId}`);

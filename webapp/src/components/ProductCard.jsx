@@ -43,7 +43,6 @@ const ProductCard = ({ product, onDelete }) => {
                         <Text style={{ fontSize: 18, lineHeight: "125%" }}>{product.Price}&#8381;</Text>
                     </Flex>
                 </Flex>
-
             </div>
         </Card>
     );
