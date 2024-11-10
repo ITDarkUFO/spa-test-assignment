@@ -59,5 +59,50 @@ namespace WebServer.Resources.Models {
                 resourceCulture = value;
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Product description should not be longer than 500 characters.
+        /// </summary>
+        public static string Description_LengthError {
+            get {
+                return ResourceManager.GetString("Description_LengthError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The product name must not be longer than 100 characters.
+        /// </summary>
+        public static string Name_LengthError {
+            get {
+                return ResourceManager.GetString("Name_LengthError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The price of the product must be no less than {0} and no more than {1}.
+        /// </summary>
+        public static string Price_MinMaxError {
+            get {
+                return ResourceManager.GetString("Price_MinMaxError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The product quantity must be no less than {0} and no more than {1}.
+        /// </summary>
+        public static string Quantity_MinMaxError {
+            get {
+                return ResourceManager.GetString("Quantity_MinMaxError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Product code must be no less than {0} and no more than {1}.
+        /// </summary>
+        public static string Vendorcode_MinMaxError {
+            get {
+                return ResourceManager.GetString("Vendorcode_MinMaxError", resourceCulture);
+            }
+        }
     }
 }
