@@ -27,15 +27,14 @@ namespace WebServer.Controllers
                 var output = new Dictionary<string, object>();
 
                 var products = await _productsService.GetProductsAsync(page, pageSize);
-                var productCount = await _productsService.GetProductsCountAsync();
-                var totalPages = Math.Ceiling((decimal)productCount / pageSize);
+                var productsCount = await _productsService.GetProductsCountAsync();
 
                 if (products.Count == 0)
                     output.Add("message", _localizer["NothingFound"].Value);
 
                 output.Add("page", page);
                 output.Add("pageSize", pageSize);
-                output.Add("totalPages", totalPages);
+                output.Add("productsCount", productsCount);
                 output.Add("products", products);
 
                 return Ok(JsonSerializer.Serialize(output));

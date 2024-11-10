@@ -31,6 +31,7 @@ const DeleteButton = ({ productId, onDelete }) => {
 
             const response = await axios.delete(`/api/products/${productId}`);
             console.log(response);
+
             onDelete(productId);
         }
         catch (error) {

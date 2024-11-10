@@ -1,4 +1,5 @@
-﻿import { Layout, Typography } from 'antd';
+﻿import { React, useState, useEffect } from 'react';
+import { Layout, Typography } from 'antd';
 
 import { DataFetchProvider } from './context/DataFetchContext';
 import { ModalProvider } from './context/ModalContext';
@@ -9,14 +10,27 @@ import ViewEditProductModal from './components/ViewEditProductModal';
 
 import './App.css'
 
-const { innerHeight: height } = window;
-
 const { Header, Content, Footer } = Layout;
 const { Title } = Typography;
 
 function App() {
+    const [pageHeight, setPageHeight] = useState(window.innerHeight);
+
+    useEffect(() => {
+        const handleResize = () => {
+            setPageHeight(window.innerHeight);
+        };
+
+        window.addEventListener("resize", handleResize);
+
+        return () => {
+            window.removeEventListener("resize", handleResize);
+        };
+
+    }, []);
+
     return (
-        <Layout style={{ minHeight: height }}>
+        <Layout style={{ minHeight: pageHeight }}>
             <Header>
                 <Title style={{ color: "white" }}>SPA Shop</Title>
             </Header>
