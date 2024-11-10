@@ -1,49 +1,43 @@
-﻿import { React, useState } from 'react'
-import { Flex, Card, Typography, Space } from 'antd'
-import DeleteButton from './DeleteProductButton'
+﻿import { Flex, Card, Typography } from 'antd';
+
 import { useModal } from '../context/ModalContext';
+
+import DeleteButton from './DeleteProductButton';
 
 const { Text, Paragraph } = Typography;
 
-const ProductCard = ({ product, onDelete }) => {
-    const { setViewEditModalVisible, setViewEditModalProductId } = useModal();
+const ProductCard = ({ product }) => {
+    const { setViewEditModalProductId: setModalProductId, setIsViewEditModalVisible: setIsModalVisible } = useModal();
 
-    const [isDeleted, setIsDeleted] = useState(false);
+    const onClick = () => {
+        console.log("Открытие модального окна просмотра товара");
+        setModalProductId(product.Id);
+        setIsModalVisible(true);
+    };
 
-    const setTitle = () => {
+    const CardTitle = () => {
         return (
-            <Flex align="center" justify="space-between" style={{ marginTop: 5, marginBottom: 5 }}>
-                <Flex vertical gap={2} style={{ width: "85%" }}>
-                    <Text ellipsis="true" style={{ fontSize: 20 }}>{product.Name}</Text>
-                    <Text type="secondary">{product.Vendorcode}</Text>
-                </Flex>
-                <DeleteButton productId={product.Id} onDelete={handleDelete} />
+            <Flex vertical gap={2} className="card-title">
+                <Text ellipsis={true} className="card-title-name">{product.Name}</Text>
+                <Text type="secondary">{product.Vendorcode}</Text>
             </Flex>
-        )
-    }
+        );
+    };
 
-    const handleDelete = () => {
-        setIsDeleted(true);
-        setTimeout(() => onDelete(product.Id), 500);
-    }
-
-    const onClickEvent = () => {
-        setViewEditModalProductId(product.Id);
-        setViewEditModalVisible(true);
-    }
+    const CardExtra = () => {
+        return <DeleteButton productId={product.Id} />;
+    };
 
     return (
-        <Card hoverable title={setTitle()} className={"card " + (isDeleted ? "fade-out" : "")}>
-            <div className="card-body" onClick={onClickEvent}>
-                <Flex vertical justify="space-between" style={{ minHeight: 'inherit' }}>
-                    <Paragraph ellipsis={{ rows: 5 }} >{product.Description}</Paragraph>
+        <Card hoverable title={<CardTitle />} extra={<CardExtra />} className="card" onClick={onClick}>
+            <Flex vertical justify="space-between" className="card-body">
+                <Paragraph ellipsis={{ rows: 5 }}>{product.Description}</Paragraph>
 
-                    <Flex align="flex-end" justify="space-between">
-                        <Text style={{ fontSize: 18, maxWidth: "80%", lineHeight: "125%" }}>На складе {product.Quantity}&nbsp;ед.&nbsp;товара</Text>
-                        <Text style={{ fontSize: 18, lineHeight: "125%" }}>{product.Price}&#8381;</Text>
-                    </Flex>
+                <Flex align="flex-end" justify="space-between" className="card-text">
+                    <Text className="card-text-quantity">Осталось {product.Quantity} шт.</Text>
+                    <Text className="card-text-price">{product.Price}&#8381;</Text>
                 </Flex>
-            </div>
+            </Flex>
         </Card>
     );
 };

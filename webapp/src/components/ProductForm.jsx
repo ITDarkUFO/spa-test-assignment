@@ -1,12 +1,13 @@
-﻿import { React } from 'react';
-import { Form, Input, InputNumber } from 'antd';
+﻿import { Form, Input, InputNumber } from 'antd';
 
 const { TextArea } = Input;
 
 const ProductForm = ({ form, isFormDisabled }) => {
+    const INT32_MAX = Math.pow(2, 31) - 1;
+
     return (
         <Form form={form} layout="vertical" className="modal-form">
-            <Form.Item hidden name="Id"><InputNumber/></Form.Item>
+            <Form.Item hidden name="Id"><InputNumber /></Form.Item>
             <Form.Item name="Name" label="Название товара"
                 rules={[
                     {
@@ -41,7 +42,13 @@ const ProductForm = ({ form, isFormDisabled }) => {
                         min: 0,
                         type: 'number',
                         message: 'Код товара должен быть положительным числом'
-                    }]}>
+                    },
+                    {
+                        max: INT32_MAX,
+                        type: 'number',
+                        message: `Код товара должен быть не больше ${INT32_MAX}`
+                    }
+                ]}>
                 <InputNumber disabled={isFormDisabled} size="large" placeholder="1234567" min="0" />
             </Form.Item>
             <Form.Item name="Quantity" label="Количество на складе"
@@ -54,7 +61,13 @@ const ProductForm = ({ form, isFormDisabled }) => {
                         min: 0,
                         type: 'number',
                         message: 'Количество товара должно быть положительным числом'
-                    }]}>
+                    },
+                    {
+                        max: INT32_MAX,
+                        type: 'number',
+                        message: `Количество товара должно быть не больше ${INT32_MAX}`
+                    }
+                ]}>
                 <InputNumber disabled={isFormDisabled} id="productQuantity" size="large" placeholder="0" min="0" />
             </Form.Item>
             <Form.Item name="Price" label="Цена товара"
@@ -67,12 +80,17 @@ const ProductForm = ({ form, isFormDisabled }) => {
                         min: 0,
                         type: 'number',
                         message: 'Цена товара должна быть положительным числом'
+                    },
+                    {
+                        max: INT32_MAX,
+                        type: 'number',
+                        message: `Цена товара должна быть не больше ${INT32_MAX}`
                     }
                 ]}>
                 <InputNumber disabled={isFormDisabled} size="large" placeholder="0.00" default={100} step={1} min={0} />
             </Form.Item>
         </Form>
     );
-}
+};
 
 export default ProductForm;

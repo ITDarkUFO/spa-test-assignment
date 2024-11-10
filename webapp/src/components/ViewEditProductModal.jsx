@@ -1,46 +1,47 @@
-﻿import { React, useEffect, useState } from 'react'
-import { Button, Modal, Input, InputNumber, Form, Typography } from 'antd'
-import { CloseOutlined, EditOutlined, SaveOutlined } from '@ant-design/icons';
+﻿import { useEffect, useState } from 'react';
+import axios from '../api/axios';
 
-import ProductForm from './ProductForm';
+import { Button, Modal, Form } from 'antd';
+import { CloseOutlined, EditOutlined, SaveOutlined } from '@ant-design/icons';
 
 import { useDataFetch } from '../context/DataFetchContext';
 import { useModal } from '../context/ModalContext';
 
-import axios from '../api/axios'
-
-const { TextArea } = Input;
-const { Text } = Typography;
+import ProductViewForm from './ProductViewForm';
+import ProductForm from './ProductForm';
 
 const ViewEditProductModal = () => {
-    const { isViewEditModalVisible, setViewEditModalVisible, viewEditModalProductId, setViewEditModalProductId } = useModal();
     const { dispatch } = useDataFetch();
-
-    const isFormReadOnly = true;
+    const {
+        isViewEditModalVisible: isModalVisible,
+        setIsViewEditModalVisible: setIsModalVisible,
+        viewEditModalProductId: productId,
+        setViewEditModalProductId: setProductId
+    } = useModal();
 
     const [isLoading, setIsLoading] = useState(false);
     const [isEditMode, setIsEditMode] = useState(false);
     const [isFormDisabled, setIsFormDisabled] = useState(false);
 
-    const [data, setData] = useState(null);
+    const [productData, setProductData] = useState(null);
 
     const [viewForm] = Form.useForm();
     const [editForm] = Form.useForm();
 
-
     useEffect(() => {
-        if (viewEditModalProductId != null) {
+        if (productId != null) {
             setIsLoading(true);
             fetchDataAsync();
         }
-    }, [viewEditModalProductId]);
+    }, [productId]);
 
     const fetchDataAsync = async () => {
         try {
-            const response = await axios.get(`/api/products/${viewEditModalProductId}`);
+            console.log(`Запрос информации о товаре ${productId}`);
+            const response = await axios.get(`/api/products/${productId}`);
             console.debug(response);
 
-            setData(response.data);
+            setProductData(response.data);
             viewForm.setFieldsValue(response.data);
         }
         catch (error) {
@@ -56,11 +57,12 @@ const ViewEditProductModal = () => {
             var validateResults = await editForm.validateFields();
             setIsFormDisabled(true);
 
-            const response = await axios.put(`/api/products/${data.Id}`, validateResults);
+            console.log(`Запрос на обновление товара ${productData.Id}`);
+            const response = await axios.put(`/api/products/${productData.Id}`, validateResults);
             console.log(response);
 
-            setViewEditModalVisible(false);
-            setViewEditModalProductId(null);
+            setIsModalVisible(false);
+            setProductId(null);
             setIsEditMode(false);
 
             dispatch({ type: 'TOGGLE_FETCH' });
@@ -82,49 +84,27 @@ const ViewEditProductModal = () => {
     }
 
     const handleClose = () => {
-        setViewEditModalVisible(false);
+        setIsModalVisible(false);
         setIsEditMode(false);
-    }
+    };
+
+    const changeEditMode = () => {
+        setIsEditMode(!isEditMode);
+        editForm.setFieldsValue(productData);
+    };
 
     const ProductData = () => {
         if (!isLoading) {
             if (!isEditMode) {
-                return (
-                    <Form form={viewForm} layout="vertical" className="modal-form">
-                        <Form.Item name="Name" label="Название товара">
-                            <TextArea readOnly={isFormReadOnly} size="large"></TextArea>
-                        </Form.Item>
-                        <Form.Item name="Description" label="Описание товара">
-                            <TextArea readOnly={isFormReadOnly} size="large" ></TextArea>
-                        </Form.Item>
-                        <Form.Item name="Vendorcode" label="Код товара">
-                            <InputNumber readOnly={isFormReadOnly} size="large" />
-                        </Form.Item>
-                        <Form.Item name="Quantity" label="Количество на складе">
-                            <InputNumber readOnly={isFormReadOnly} id="productQuantity" size="large" />
-                        </Form.Item>
-                        <Form.Item name="Price" label="Цена товара">
-                            <InputNumber readOnly={isFormReadOnly} size="large" />
-                        </Form.Item>
-                    </Form>
-                );
+                return (<ProductViewForm form={viewForm} />);
             }
             else {
-                return (
-                    <ProductForm form={editForm} isFormDisabled={isFormDisabled} />
-                )
+                return (<ProductForm form={editForm} isFormDisabled={isFormDisabled} />);
             }
         }
-    }
+    };
 
-    const getModalTitle = () => {
-        return isEditMode ? "Редактирование товара" : "Просмотр товара";
-    }
-
-    const changeEditMode = () => {
-        setIsEditMode(!isEditMode);
-        editForm.setFieldsValue(data);
-    }
+    const ModalTitle = isEditMode ? "Редактирование товара" : "Просмотр товара";
 
     const FooterButtons = () => {
         if (isEditMode) {
@@ -143,17 +123,17 @@ const ViewEditProductModal = () => {
                 </>
             );
         }
-    }
+    };
 
     return (
-        <Modal title={getModalTitle()}
+        <Modal title={ModalTitle}
             loading={isLoading}
-            open={isViewEditModalVisible}
+            open={isModalVisible}
             onCancel={handleClose}
             footer={FooterButtons}>
             <ProductData />
         </Modal>
-    )
+    );
 };
 
 export default ViewEditProductModal;

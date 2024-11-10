@@ -1,8 +1,7 @@
-import React from 'react';
 import { Skeleton, Col, Row, Flex, Card } from 'antd';
 
-const LoadingSkeleton = () => {
-    var cardsCount = 9;
+const LoadPage = ({ pageSize }) => {
+    var cardsCount = pageSize;
     var cards = [];
 
     for (var i = 0; i < cardsCount; i++) {
@@ -19,11 +18,12 @@ const LoadingSkeleton = () => {
                 <Skeleton.Input active size="large" />
                 <Skeleton.Input active size="large" />
             </Flex>
-            <Col className="cards-list-col">
+            <Col className="cards-grid">
                 {cards}
             </Col>
+            <Skeleton.Input active block size="large" />
         </>
     );
-}
+};
 
-export default LoadingSkeleton;
+export default LoadPage;

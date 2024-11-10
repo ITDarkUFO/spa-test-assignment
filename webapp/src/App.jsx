@@ -15,12 +15,14 @@ const { Title } = Typography;
 
 function App() {
     const [pageHeight, setPageHeight] = useState(window.innerHeight);
+    const [pageWidth, setPageWidth] = useState(window.innerWidth);
 
     useEffect(() => {
         const handleResize = () => {
+            setPageWidth(window.innerWidth);
             setPageHeight(window.innerHeight);
         };
-
+;
         window.addEventListener("resize", handleResize);
 
         return () => {
@@ -37,7 +39,7 @@ function App() {
             <Content className="content-wrapper">
                 <DataFetchProvider>
                     <ModalProvider>
-                        <PageContent />
+                        <PageContent pageWidth={pageWidth} />
                         <CreateProductModal />
                         <ViewEditProductModal />
                     </ModalProvider>

@@ -1,49 +1,53 @@
-﻿import { React, useState, useMemo } from 'react'
+﻿import { useState } from 'react'
 import axios from '../api/axios'
+
 import { Button } from 'antd'
 import { DeleteOutlined } from '@ant-design/icons';
 
-const DeleteButton = ({ productId, onDelete }) => {
-    const [deletePending, setDeleteConfirmation] = useState(false);
-    const [isSubmitting, setSubmitting] = useState(false);
+import { useDataFetch } from '../context/DataFetchContext';
 
-    const buttonStatus = useMemo(() => {
-        if (!deletePending)
-            return "primary";
-        else
-            return "danger";
-    }, [deletePending]);
+const DeleteButton = ({ productId }) => {
+    const { dispatch } = useDataFetch();
 
-    const handleDelete = async () => {
+    const [deletePending, setDeletePending] = useState(false);
+    const [isDeletingProduct, setIsDeletingProduct] = useState(false);
+
+    const showDeletePending = () => {
+        setDeletePending(true);
+
+        setTimeout(() => {
+            setDeletePending(false);
+        }, 10000);
+    };
+
+    const handleDelete = async (event) => {
+        event.stopPropagation();
+
         if (!deletePending) {
-            setDeleteConfirmation(true);
-
-            setTimeout(() => {
-                setDeleteConfirmation(false);
-            }, 10000);
-
+            showDeletePending();
             return;
         }
 
         try {
-            console.debug(`Запрос на удаление товара ${productId}`);
-            setSubmitting(true);
+            setIsDeletingProduct(true);
 
+            console.log(`Запрос на удаление товара ${productId}`);
             const response = await axios.delete(`/api/products/${productId}`);
             console.log(response);
 
-            onDelete(productId);
+            dispatch({ type: 'TOGGLE_FETCH' });
         }
         catch (error) {
             console.error(error);
         }
         finally {
-            setSubmitting(false);
+            setIsDeletingProduct(false);
         }
     };
 
     return (
-        <Button variant="solid" color={buttonStatus} loading={isSubmitting} icon={< DeleteOutlined />} size="medium" onClick={handleDelete} />
+        <Button type="primary" size="medium" icon={< DeleteOutlined />}
+            danger={deletePending} loading={isDeletingProduct} onClick={handleDelete} />
     );
 }
 

@@ -9,10 +9,8 @@ import { useModal } from '../context/ModalContext';
 
 import axios from '../api/axios'
 
-
-
 const CreateProductModal = () => {
-    const { isCreateModalVisible, setCreateModalVisible } = useModal();
+    const { isCreateModalVisible: isModalVisible, setIsCreateModalVisible: setIsModalVisible } = useModal();
     const { dispatch } = useDataFetch();
 
     const [isFormDisabled, setIsFormDisabled] = useState(false);
@@ -20,20 +18,20 @@ const CreateProductModal = () => {
     const [form] = Form.useForm();
 
     const handleClose = () => {
-        setCreateModalVisible(false);
+        setIsModalVisible(false);
         form.resetFields();
-    }
+    };
 
     const submitFormAsync = async () => {
         try {
             var validateResults = await form.validateFields();
             setIsFormDisabled(true);
 
-            console.debug("Запрос на добавление товара");
+            console.log("Запрос на добавление товара");
             const response = await axios.post("/api/products", validateResults);
             console.log(response);
 
-            await setCreateModalVisible(false);
+            await setIsModalVisible(false);
             form.resetFields();
 
             dispatch({ type: 'TOGGLE_FETCH' });
@@ -50,7 +48,7 @@ const CreateProductModal = () => {
         finally {
             setIsFormDisabled(false);
         }
-    }
+    };
 
     const FooterButtons = () => {
         return (
@@ -59,13 +57,13 @@ const CreateProductModal = () => {
                 <Button icon={<CloseOutlined />} key="back" onClick={handleClose}>Закрыть</Button>
             </>
         );
-    }
+    };
 
     return (
-        <Modal title="Добавление товара" open={isCreateModalVisible} onCancel={handleClose} footer={FooterButtons}>
+        <Modal title="Добавление товара" open={isModalVisible} onCancel={handleClose} footer={FooterButtons}>
             <ProductForm form={form} isFormDisabled={isFormDisabled} />
         </Modal>
     );
-}
+};
 
 export default CreateProductModal;
